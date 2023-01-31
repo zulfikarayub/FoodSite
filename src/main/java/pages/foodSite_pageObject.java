@@ -1,5 +1,10 @@
 package pages;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -8,89 +13,32 @@ import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import utilities.Driver;
 
+import java.io.*;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class foodSite_pageObject extends Driver {
 
-    public static int count;
-    public static String UiProductName, UiProductPrice;
+    @FindBy(css = "#recipe h1")
+    public WebElement FoodHeaderName;
 
-    @FindBy(xpath = "//li[contains(@data-href,'account/login/')]")
-    public WebElement loginLink;
-    @FindBy(id = "email")
-    public WebElement loginEmail;
-    @FindBy(id = "pass")
-    public WebElement loginPassword;
-    @FindBy(id = "send2")
-    public WebElement loginEnterButton;
-    @FindBy(xpath = "//li[contains(@data-href,'account/logout/')]")
-    public WebElement ButtonLogOut;
-    @FindBy(xpath = "(//nav[@id='menu']//a[contains(@href,'mujer.html') and text()='Mujer'])[1]")
-    public WebElement mujerMainMenu;
-    @FindBy(xpath = "//section[@id='galeria']/article")
-    public List<WebElement> mujerMainMenu_ItemsCount;
-    @FindBy(xpath = "//img[contains(@alt,'Admit One')]")
-    public WebElement admitOneLogo;
+    @FindBy(xpath = "//dt[text()='Ready In:']/..//dd")
+    public WebElement readyMin;
 
+    @FindBy(xpath = "//ul[contains(@class,'direction-list')]")
+    public WebElement directionList;
 
-    @FindBy(xpath = "(//nav[@id='menu']//a[contains(@href,'hombre.html') and text()='Hombre'])[1]")
-    public WebElement hombreMainMenu;
-    @FindBy(xpath = "//nav[@id='menu']//a[contains(@href,'ninos') and text()='Kids']")
-    public WebElement kidsMainMenu;
-    @FindBy(xpath = "//h1[@id='nombreProducto']")
-    public WebElement productName;
-    @FindBy(xpath = "//span[@itemprop='price']")
-    public WebElement productPrice;
-    @FindBy(xpath = "(//div[@class='swatchesContainer']//div[not(contains(@class,'disabledSwatch'))])[1]")
-    public WebElement availableFirstSizeSelection;
-    @FindBy(xpath = "//button[text()='Comprar']")
-    public WebElement buyButton;
+    @FindBy(xpath = "//ul[contains(@class,'ingredient-list')]")
+    public WebElement integrationList;
 
-    @FindBy(xpath = " //a[text()='SEGUIR COMPRANDO']")
-    public WebElement popUpContinueShopping;
+    @FindBy(xpath = "//button[contains(@class,'facts__nutrition')]")
+    public WebElement nutritionInfoLink;
 
-    @FindBy(xpath = "//a[text()='IR A MI BOLSA']")
-    public WebElement popUpGoToCart;
+    @FindBy(xpath = "//div[contains(@aria-labelledby,'nutrition-info')]")
+    public WebElement nutritionPopUpInfo;
 
-    @FindBy(xpath = "//a[text()='Login con Google']")
-    public WebElement loginViaGoogle;
-
-    @FindBy(xpath = "//span[text()='Finalizar compra']")
-    public WebElement checkOutButton;
-
-    @FindBy(xpath = "//div[@id='billing-buttons-container']//button[@title='Continuar']")
-    public WebElement continueCustomerDetails;
-
-    @FindBy(xpath = "//input[@id='s_method_pickuppoint_00001']")
-    public WebElement deliveryFreeChargeOption;
-
-    @FindBy(xpath = "//ul[@id='shipping_form_pickuppoint_00001']//select")
-    public WebElement selectOptionToSend;
-
-    @FindBy(xpath = "//div[@id='shipping-method-buttons-container']//button")
-    public WebElement continueShippingMethodContinue;
-
-    @FindBy(xpath = "//input[@id='p_method_mercadopago2_standard']")
-    public WebElement mercadoPagoPayment;
-
-    @FindBy(xpath = "//div[@id='payment-buttons-container']//button")
-    public WebElement paymentContinueButton;
-
-    @FindBy(xpath = "//button//span[text()='Realizar pago']")
-    public WebElement finalPaymentButton;
-
-    @FindBy(xpath = "//span[text()='MERCADO PAGO']")
-    public WebElement mercadoPagoPaymentDisplayed;
-
-    @FindBy(xpath = "//strong[text()='Total general']/../..//span[@class='price']")
-    public WebElement totalGeneralPayment;
-
-    @FindBy(xpath = "//span[@class='row-summary__price ']")
-    public WebElement paymentPageAmount;
-
-
-
+    public static String strFoodHeader, strReadyInMin, strIntegrationList, strDirectionList, strNutritionInfo;
 
 
     public foodSite_pageObject(WebDriver driver) {
@@ -98,19 +46,76 @@ public class foodSite_pageObject extends Driver {
     }
 
     public void loginCheck() {
-
+        int k = 0, column = 0;
+        Cell value = null;
+        Row rowValue = null;
+        String UrlValue = null;
         try {
+            //excelData();
+            File excelFile = new File("src/test/resources/FOODDATA.xlsx");
+            FileInputStream fis = new FileInputStream(excelFile);
 
-            visit("https://www.admitone.com.ar/");
-            loginLink.click();
-            log.info("clicking on sing in button");
-            loginEmail.sendKeys("newtestadmitone@mailinator.com");
-            log.info("Entering email id..");
-            loginPassword.sendKeys("Test@123");
-            log.info("Entering password...");
-            loginEnterButton.click();
-            log.info("clicking on sign in button...");
-            Assert.assertTrue(ButtonLogOut.isDisplayed());
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIt = sheet.iterator();
+            int rowCount = sheet.getLastRowNum() - sheet.getFirstRowNum();
+            for (int i = 1; i <= rowCount; i++) {
+                Thread.sleep(5000);
+                int cellCount = sheet.getRow(i).getLastCellNum();
+                log.info("cell count is ..." + cellCount);
+                for (int j = 0; j < cellCount; j++) {
+
+                    log.info(sheet.getRow(i).getCell(j).getStringCellValue());
+                    UrlValue = sheet.getRow(i).getCell(j).getStringCellValue();
+                    visit("https://www.food.com/recipe/" + UrlValue);
+                    waitForVisibility(FoodHeaderName, 30);
+                    Assert.assertTrue(true);
+                    headerValue();
+                    readyInMin();
+                    getDirectionList();
+                    getIntegrationList();
+                    getNutritionValue();
+                    XSSFCell cellHeader = sheet.getRow(i).createCell(1);
+                    cellHeader.setCellValue(strFoodHeader);
+                    XSSFCell cellReadyMin = sheet.getRow(i).createCell(2);
+                    cellReadyMin.setCellValue(strReadyInMin);
+                    XSSFCell cellDirectionList = sheet.getRow(i).createCell(3);
+                    cellDirectionList.setCellValue(strDirectionList);
+                    XSSFCell cellIntegrationValue = sheet.getRow(i).createCell(4);
+                    cellIntegrationValue.setCellValue(strIntegrationList);
+                    XSSFCell cellNutritionValue = sheet.getRow(i).createCell(5);
+                    cellNutritionValue.setCellValue(strNutritionInfo);
+
+                    FileOutputStream ots = new FileOutputStream(excelFile);
+                    workbook.write(ots);
+                    Thread.sleep(5000);
+                }
+            }
+            workbook.close();
+//            Row firstRow = rowIt.next();
+//            Iterator<Cell> cellIt =  firstRow.cellIterator();
+//            while (cellIt.hasNext()){
+//                 value = cellIt.next();
+//                if (value.getStringCellValue().equalsIgnoreCase("URL")){
+//                    column=k;
+//                }
+//                k++;
+//            }
+//            int cellCount = sheet.getRow(column).getLastCellNum();
+//            log.info("cell count is ..."+cellCount);
+//            for (int j=0;j<cellCount;j++){
+//                log.info(sheet.getRow(column).getCell(j).getStringCellValue());
+//            }
+
+
+//            visit("https://www.food.com/recipe/"+value);
+//            waitForVisibility(FoodHeaderName,30);
+//            Assert.assertTrue(true);
+//            headerValue();
+//            readyInMin();
+//            getDirectionList();
+//            getIntegrationList();
+//            getNutritionValue();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,156 +124,124 @@ public class foodSite_pageObject extends Driver {
         }
     }
 
-    public int clickOnMujerMenu() {
+
+    public String headerValue() {
 
         try {
-
-
-            mujerMainMenu.click();
-            log.info("clicking on mujer link");
-            count = mujerMainMenu_ItemsCount.size();
-            log.info("the total count is " + count);
+            waitForVisibility(FoodHeaderName, 30);
+            Assert.assertTrue(true);
+            strFoodHeader = FoodHeaderName.getText();
+            log.info("the header value is " + strFoodHeader);
 
         } catch (Exception e) {
             e.printStackTrace();
             log.error("failed due to :::" + e.getMessage());
             Assert.fail(e.getMessage());
         }
-        return count;
+        return strFoodHeader;
     }
 
-    public int clickOnHombreMenu() {
+    public String readyInMin() {
 
         try {
-
-
-            hombreMainMenu.click();
-            log.info("clicking on hombre link");
-            count = mujerMainMenu_ItemsCount.size();
-            log.info("the total count is " + count);
+            waitForVisibility(readyMin, 30);
+            Assert.assertTrue(true);
+            strReadyInMin = readyMin.getText();
+            log.info("The ready in Mins value is " + strReadyInMin);
 
         } catch (Exception e) {
             e.printStackTrace();
             log.error("failed due to :::" + e.getMessage());
             Assert.fail(e.getMessage());
         }
-        return count;
+        return strReadyInMin;
     }
 
-    public int clickOnKidsMenu() {
+    public String getDirectionList() {
 
         try {
-
-            kidsMainMenu.click();
-            log.info("clicking on kids link");
-            count = mujerMainMenu_ItemsCount.size();
-            log.info("the total count is " + count);
+            waitForVisibility(directionList, 30);
+            Assert.assertTrue(true);
+            strDirectionList = directionList.getText();
+            log.info("The Direction list value is " + strDirectionList);
 
         } catch (Exception e) {
             e.printStackTrace();
             log.error("failed due to :::" + e.getMessage());
             Assert.fail(e.getMessage());
         }
-        return count;
+        return strDirectionList;
     }
 
-    public LinkedList<String> selectItemFromDisplay(int itemNumber, WebElement selectSize, WebElement buyOrCheckOut) {
-        LinkedList<String> itemList = new LinkedList<String>();
-        try {
+    public String getIntegrationList() {
 
-            mujerMainMenu_ItemsCount.get(itemNumber).click();
-            log.info("Clicking on first item ");
-            UiProductName = productName.getText();
-            log.info("Getting product name " + UiProductName);
-            itemList.add(UiProductName);
-            UiProductPrice = productPrice.getText();
-            log.info("Getting product price " + UiProductPrice);
-            itemList.add(UiProductPrice);
-            selectSize.click();
-            log.info("clicking on the size");
-            buyButton.click();
-            log.info("clicking on buy Button");
-            Thread.sleep(2000);
-            buyOrCheckOut.click();
+        try {
+            waitForVisibility(integrationList, 30);
+            Assert.assertTrue(true);
+            strIntegrationList = integrationList.getText();
+            log.info("The integration list value is " + strIntegrationList);
 
         } catch (Exception e) {
             e.printStackTrace();
             log.error("failed due to :::" + e.getMessage());
             Assert.fail(e.getMessage());
         }
-        return itemList;
+        return strIntegrationList;
     }
 
-    public void selectDeliveryOption(int optionToSelect) {
+    public String getNutritionValue() {
 
         try {
-            deliveryFreeChargeOption.click();
-            log.info("clicking on free delivery charge details");
-            Select se = new Select(selectOptionToSend);
-            se.selectByIndex(optionToSelect);
-            continueShippingMethodContinue.click();
-
+            nutritionInfoLink.click();
+            waitForVisibility(nutritionPopUpInfo, 30);
+            Assert.assertTrue(true);
+            strNutritionInfo = nutritionPopUpInfo.getText();
+            log.info("The Nutrition list value is " + strNutritionInfo);
 
         } catch (Exception e) {
             e.printStackTrace();
             log.error("failed due to :::" + e.getMessage());
             Assert.fail(e.getMessage());
         }
-
+        return strNutritionInfo;
     }
 
-    public void MercadoPaymentMethod(WebElement paymentType) {
+    public void excelData() {
 
         try {
-            paymentType.click();
-            log.info("clicking on mercado pago details");
-            paymentContinueButton.click();
+            File excelFile = new File("src/test/resources/FOODDATA.xlsx");
+            FileInputStream fis = new FileInputStream(excelFile);
 
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            XSSFSheet sheet = workbook.getSheetAt(0);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("failed due to :::" + e.getMessage());
-            Assert.fail(e.getMessage());
-        }
+            Iterator<Row> rowIt = sheet.iterator();
 
-    }
+            while (rowIt.hasNext()) {
+                Row row = rowIt.next();
 
-    public String amountSplit(WebElement paymentAmount) {
-        String totalPay = null;
+                Iterator<Cell> cellIt = row.cellIterator();
 
-        try {
-            totalPay = paymentAmount.getText();
-            log.info("the amount from UI is  " + totalPay);
-            String[] arrOfStr = totalPay.split("$");
-            totalPay = arrOfStr[1];
-            log.info("the amount after removing $ is  " + totalPay);
+                while (cellIt.hasNext()) {
+                    Cell cell = cellIt.next();
 
+                    System.out.print(cell.getStringCellValue() + " ");
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("failed due to :::" + e.getMessage());
-            Assert.fail(e.getMessage());
-        }
-        return totalPay;
+                System.out.println();
+            }
 
-    }
-
-    public void finalPayment(WebElement paymentType) {
-
-        try {
-
-            paymentType.click();
-            log.info("clicking on final payment");
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("failed due to :::" + e.getMessage());
-            Assert.fail(e.getMessage());
+            workbook.close();
+            fis.close();
+        } catch (FileNotFoundException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
         }
 
 
     }
+
 
 }
 

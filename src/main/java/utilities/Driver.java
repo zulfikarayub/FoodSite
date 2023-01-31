@@ -68,7 +68,8 @@ public class Driver {
 
     @AfterTest(alwaysRun = true)
     public void writeReport() {
-        report.flush();
+        //report.flush();
+        closeDriver();
     }
 
     @BeforeMethod(alwaysRun = true)
@@ -232,27 +233,27 @@ public class Driver {
     }
 
     public static WebElement waitForVisibility(WebElement element, int timeToWaitInSec) throws Exception {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeToWaitInSec);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(timeToWaitInSec));
         return wait.until(ExpectedConditions.visibilityOf(element));
     }
 
     public static WebElement waitForVisibility(By locator, int timeout) throws Exception {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeout);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(timeout));
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
     public static Boolean waitForInVisibility(By locator, int timeout) throws Exception {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeout);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(timeout));
         return wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
     public static WebElement waitForClickablility(WebElement element, int timeout) throws Exception {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeout);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(timeout));
         return wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 
     public static WebElement waitForClickablility(By locator, int timeout) throws Exception {
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), timeout);
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(timeout));
         return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
@@ -263,7 +264,7 @@ public class Driver {
             }
         };
         try {
-            WebDriverWait wait = new WebDriverWait(getDriver(), timeOutInSeconds);
+            WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(timeOutInSeconds));
             wait.until(expectation);
         } catch (Exception error) {
             error.printStackTrace();
@@ -531,7 +532,7 @@ public class Driver {
     }
 
     public void waitForElementDisplayed(By locator) {
-        WebDriverWait wait = new WebDriverWait(driver, 30);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         wait.until(ExpectedConditions.visibilityOfAllElements(driver.findElements(locator)));
     }
 
